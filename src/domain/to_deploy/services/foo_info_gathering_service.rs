@@ -32,7 +32,7 @@ impl<'a> FooInfoGatheringService<'a> {
         let token = config.jira_token.to_string();
 
         let service: FooInfoGatheringService<'a> = FooInfoGatheringService {
-            result_printer_service: Box::new(ResultPrinterServiceImpl::new(&config)),
+            result_printer_service: Box::new(ResultPrinterServiceImpl::new(config.clone())),
             github_service: Box::new(github_service.clone()),
             ticket_extraction_service: Box::new(FooTicketExtractionService::new()),
             jira_service: Box::new(JiraServiceImpl::new(base_url, token)),

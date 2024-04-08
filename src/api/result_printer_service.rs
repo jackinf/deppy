@@ -34,17 +34,17 @@ pub trait ResultPrinterService: Sync + Send {
     );
 }
 
-pub struct ResultPrinterServiceImpl<'a> {
-    pub config: &'a Config,
+pub struct ResultPrinterServiceImpl {
+    pub config: Config,
 }
 
-impl<'a> ResultPrinterServiceImpl<'a> {
-    pub fn new(config: &'a Config) -> Self {
-        ResultPrinterServiceImpl { config: &config }
+impl ResultPrinterServiceImpl {
+    pub fn new(config: Config) -> Self {
+        ResultPrinterServiceImpl { config }
     }
 }
 
-impl<'a> ResultPrinterService for ResultPrinterServiceImpl<'a> {
+impl ResultPrinterService for ResultPrinterServiceImpl {
     fn print_message_from_extract_tickets_result(
         &self,
         payload: PrintMessageFromExtractTicketsResultPayload,

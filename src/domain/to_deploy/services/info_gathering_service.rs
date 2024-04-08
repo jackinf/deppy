@@ -23,16 +23,14 @@ pub trait InfoGatheringService<'a>: Sync + Send {
         &self,
         owner_name: &str,
         service_name: &str,
-        service_sub_name: &str,
         env: &str,
-        cluster: Option<&str>,
     ) -> anyhow::Result<()> {
         /*
            Part 1. Extract the commit sha for the service
         */
         let source_sha = self
             .get_config_extraction_service()
-            .extract_commit_sha(service_name, service_sub_name, env, cluster)
+            .extract_commit_sha(service_name, env)
             .await?
             .commit_sha;
 

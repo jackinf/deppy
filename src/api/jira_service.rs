@@ -26,15 +26,6 @@ impl JiraServiceImpl {
 
 #[async_trait]
 impl JiraService for JiraServiceImpl {
-    /// Get the JIRA issues
-    ///
-    /// Similar to the following curl command:
-    /// ```sh
-    /// curl -L \                                                                                                 ✔
-    //   -H "Content-Type: application/json" \
-    //   -H "Authorization: Bearer $JIRA_TOKEN" \
-    //   'https://JIRA_SERVER/rest/api/2/search?jql=key%20in%20(BAR-1771,%20BAR-1583)&maxResults=100'
-    /// ```
     async fn get_jira_issues(
         &self,
         issue_keys: Vec<String>,
@@ -135,38 +126,6 @@ mod tests {
         let mut issues = result.unwrap();
         issues.sort_by_key(|x| x.key.clone()); // so that the order is consistent
 
-        assert_eq!(issues.len(), 2);
-
-        assert_eq!(issues[0].key, "BAR-1583");
-        assert_eq!(issues[0].status, "Open");
-        assert_eq!(issues[0].ready, false);
-
-        assert_eq!(issues[1].key, "BAR-1771");
-        assert_eq!(issues[1].status, "In Progress");
-        assert_eq!(issues[1].ready, false);
-    }
-
-    #[tokio::test]
-    #[ignore]
-    async fn integration_test_get_jira_issue() {
-        dotenv::dotenv().ok();
-
-        let (_, jira_token) = std::env::vars()
-            .find(|(key, _)| key == "JIRA_TOKEN")
-            .expect("failed to get jira token");
-        let (_, jira_server) = std::env::vars()
-            .find(|(key, _)| key == "JIRA_SERVER")
-            .expect("failed to get jira server");
-
-        let jira_service = JiraServiceImpl::new(jira_server, jira_token);
-        let payload = vec!["BAR-1771".to_string(), "BAR-1583".to_string()];
-
-        let result = jira_service.get_jira_issues(payload).await;
-
-        assert!(result.is_ok());
-
-        let mut issues = result.unwrap();
-        issues.sort_by_key(|x| x.key.clone()); // so that the order is consistent
         assert_eq!(issues.len(), 2);
 
         assert_eq!(issues[0].key, "BAR-1583");

@@ -31,7 +31,7 @@ impl<'a> BarInfoGatheringService<'a> {
         BarInfoGatheringService {
             github_service: Box::new(github_service.clone()),
             ticket_extraction_service: Box::new(BarTicketExtractionService::new()),
-            result_printer_service: Box::new(ResultPrinterServiceImpl::new(&config)),
+            result_printer_service: Box::new(ResultPrinterServiceImpl::new(config.clone())),
             jira_service: Box::new(JiraServiceImpl::new(
                 config.jira_server.to_string(),
                 config.jira_token.to_string(),

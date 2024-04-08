@@ -42,24 +42,12 @@ async fn main() {
         Commands::ToDeploy(args) => match args.project.as_str() {
             constants::PROJECT_FOO_WEB => {
                 let _ = FooInfoGatheringService::new(&Config::new())
-                    .show_undeployed_commits(
-                        "MainAppServices",
-                        args.project.as_str(),
-                        "SubAppServices",
-                        "prod",
-                        Option::from("cluster-prod-01"),
-                    )
+                    .show_undeployed_commits("MainAppServices", args.project.as_str(), "prod")
                     .await;
             }
             constants::PROJECT_BAR_WEB => {
                 let _ = BarInfoGatheringService::new(&Config::new())
-                    .show_undeployed_commits(
-                        "MainAppServices",
-                        args.project.as_str(),
-                        "SubAppServices",
-                        "prod",
-                        Option::from("cluster-prod-01"),
-                    )
+                    .show_undeployed_commits("MainAppServices", args.project.as_str(), "prod")
                     .await;
             }
             // Add more projects if needed

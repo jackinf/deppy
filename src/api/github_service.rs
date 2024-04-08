@@ -44,7 +44,11 @@ pub struct GetCommitsSinceResult {
     pub commit_shas: Vec<String>,
 }
 
+#[cfg(test)]
+use mockall::{automock, predicate::*};
+
 #[async_trait]
+#[cfg_attr(test, automock)]
 pub trait GithubService: Sync + Send {
     /// Get the commit details
     ///
