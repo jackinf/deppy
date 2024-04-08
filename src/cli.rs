@@ -17,6 +17,9 @@ pub enum Commands {
 #[derive(Args)]
 pub struct CommandToDeployArgs {
     #[arg(short, long)]
+    pub owner: String,
+
+    #[arg(short, long)]
     pub project: String,
 
     #[arg(short, long)]

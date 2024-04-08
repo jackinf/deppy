@@ -37,18 +37,35 @@ async fn main() {
     env_logger::init(); // Initialize logger
 
     let cli = Cli::parse();
-
     match cli.command {
         Commands::ToDeploy(args) => match args.project.as_str() {
             constants::PROJECT_FOO_WEB => {
-                let _ = FooInfoGatheringService::new(&Config::new())
-                    .show_undeployed_commits("MainAppServices", args.project.as_str(), "prod")
-                    .await;
+                if let Ok(output) = FooInfoGatheringService::new(&Config::new())
+                    .show_undeployed_commits(
+                        args.owner.as_str(),
+                        args.project.as_str(),
+                        args.env.as_str(),
+                    )
+                    .await
+                {
+                    for line in output {
+                        println!("{}", line);
+                    }
+                }
             }
             constants::PROJECT_BAR_WEB => {
-                let _ = BarInfoGatheringService::new(&Config::new())
-                    .show_undeployed_commits("MainAppServices", args.project.as_str(), "prod")
-                    .await;
+                if let Ok(output) = BarInfoGatheringService::new(&Config::new())
+                    .show_undeployed_commits(
+                        args.owner.as_str(),
+                        args.project.as_str(),
+                        args.env.as_str(),
+                    )
+                    .await
+                {
+                    for line in output {
+                        println!("{}", line);
+                    }
+                }
             }
             // Add more projects if needed
             _ => println!("Project not found: {}", args.project),

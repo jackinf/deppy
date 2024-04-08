@@ -31,7 +31,7 @@ pub trait ResultPrinterService: Sync + Send {
     fn print_message_from_extract_tickets_result(
         &self,
         payload: PrintMessageFromExtractTicketsResultPayload,
-    );
+    ) -> Vec<String>;
 }
 
 pub struct ResultPrinterServiceImpl {
@@ -48,28 +48,30 @@ impl ResultPrinterService for ResultPrinterServiceImpl {
     fn print_message_from_extract_tickets_result(
         &self,
         payload: PrintMessageFromExtractTicketsResultPayload,
-    ) {
+    ) -> Vec<String> {
+        let mut output: Vec<String> = vec![];
+
         let owner = &payload.owner;
         let repo = &payload.repo;
         let ticket_infos = &payload.ticket_infos;
         let last_commit_in_production = &payload.last_commit_in_production;
         let commit_sha_to_release = payload.commit_sha_to_release.as_deref().unwrap_or("master");
 
-        println!(
+        output.push(format!(
             "{}/{}/{}/compare/{}...{}\n",
             self.config.github_server,
             owner,
             repo,
             last_commit_in_production,
             commit_sha_to_release
-        );
+        ));
 
         ticket_infos.iter().for_each(|commit| {
             let author_username = commit.author_email.split('@').next().unwrap_or("");
             let ticket_ready_icon = if commit.ticket_ready { "🍏" } else { "🍎" };
             let short_commit_sha = &commit.commit_sha[..7.min(commit.commit_sha.len())];
 
-            println!(
+            output.push(format!(
                 "{} @{} {}/{}/{}/commit/{} ({}) - [{}] {}",
                 ticket_ready_icon,
                 author_username,
@@ -80,7 +82,9 @@ impl ResultPrinterService for ResultPrinterServiceImpl {
                 short_commit_sha,
                 commit.ticket_key,
                 commit.commit_message
-            );
+            ));
         });
+
+        output
     }
 }

@@ -24,7 +24,7 @@ pub trait InfoGatheringService<'a>: Sync + Send {
         owner_name: &str,
         service_name: &str,
         env: &str,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<Vec<String>> {
         /*
            Part 1. Extract the commit sha for the service
         */
@@ -137,7 +137,8 @@ pub trait InfoGatheringService<'a>: Sync + Send {
         /*
            Part 7. Print the result
         */
-        self.get_result_printer_service()
+        let output = self
+            .get_result_printer_service()
             .print_message_from_extract_tickets_result(
                 PrintMessageFromExtractTicketsResultPayload {
                     owner: owner_name,
@@ -149,7 +150,7 @@ pub trait InfoGatheringService<'a>: Sync + Send {
                 },
             );
 
-        Ok(())
+        Ok(output)
     }
 }
 
