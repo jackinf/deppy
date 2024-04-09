@@ -38,7 +38,7 @@ impl VersionService {
     ) -> Result<VersionServiceResponse, VersionServiceError> {
         let client = Client::new();
         let response = client
-            .get(&self.config.github_server)
+            .get(&self.config.versions_live)
             .send()
             .await
             .map_err(|e| VersionServiceError {
@@ -74,19 +74,25 @@ mod tests {
         let config = Config {
             github_token: "abc".to_string(),
             github_server: "http://github".to_string(),
-            jira_token: "abc".to_string(),
+            jira_token: "def".to_string(),
             jira_server: "http:://jira".to_string(),
             versions_live: "http://live".to_string(),
         };
         let service = VersionService::new(config);
-        assert_eq!(service.config.github_server, "http://localhost");
+        assert_eq!(service.config.github_server, "http://github");
+        assert_eq!(service.config.jira_server, "http:://jira");
+        assert_eq!(service.config.versions_live, "http://live");
+        assert_eq!(service.config.github_token, "abc");
+        assert_eq!(service.config.jira_token, "def");
     }
 
     #[tokio::test]
     async fn test_get_versions_from_live_url_success() {
-        let mut server = mockito::Server::new();
+        let mut live_server = mockito::Server::new_async().await;
+        let mut github_server = mockito::Server::new_async().await;
+        let mut jira_server = mockito::Server::new_async().await;
 
-        let _m = server
+        let _m = live_server
             .mock("GET", "/")
             .with_status(200)
             .with_body(
@@ -100,14 +106,15 @@ mod tests {
                 })
                 .to_string(),
             )
-            .create();
+            .create_async()
+            .await;
 
         let config = Config {
             github_token: "abc".to_string(),
-            github_server: "http://github".to_string(),
+            github_server: github_server.url(),
             jira_token: "abc".to_string(),
-            jira_server: "http:://jira".to_string(),
-            versions_live: "http://live".to_string(),
+            jira_server: jira_server.url(),
+            versions_live: live_server.url(),
         };
         let service = VersionService::new(config);
         let result = service.get_versions_from_live_url().await;
@@ -118,20 +125,23 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_versions_from_live_url_error() {
-        let mut server = mockito::Server::new();
+        let mut live_server = mockito::Server::new_async().await;
+        let mut github_server = mockito::Server::new_async().await;
+        let mut jira_server = mockito::Server::new_async().await;
 
-        let _m = server
+        let _m = live_server
             .mock("GET", "/")
             .with_status(500)
             .with_body("Internal Server Error")
-            .create();
+            .create_async()
+            .await;
 
         let config = Config {
             github_token: "abc".to_string(),
-            github_server: "http://github".to_string(),
+            github_server: github_server.url(),
             jira_token: "abc".to_string(),
-            jira_server: "http:://jira".to_string(),
-            versions_live: "http://live".to_string(),
+            jira_server: jira_server.url(),
+            versions_live: live_server.url(),
         };
         let service = VersionService::new(config);
         let result = service.get_versions_from_live_url().await;

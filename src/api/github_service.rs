@@ -279,7 +279,7 @@ impl GithubService for GithubServiceImpl {
 #[cfg(test)]
 mod tests {
     use crate::api::github_service::{GithubService, GithubServiceImpl};
-    use octocrab::Octocrab;
+    use octocrab::{Octocrab, OctocrabBuilder};
 
     #[tokio::test]
     async fn test_get_commit() {
@@ -317,5 +317,64 @@ mod tests {
         assert_eq!(result.author_email, "test@test.com");
         assert_eq!(result.full_message, "Test commit message");
         assert_eq!(result.sha, "123");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_get_contents() {
+        let mut server = mockito::Server::new_async().await;
+
+        let _m = server
+            .mock(
+                "GET",
+                "/repos/jrumjantsev/config/contents/apps/foo/config.json",
+            )
+            .with_status(200)
+            .with_body(r#"{"content": "eyJpZGVudGlmeSI6ICJmb28xMjMifQ=="}"#)
+            .create_async()
+            .await;
+
+        let octo: Octocrab = OctocrabBuilder::default()
+            .base_uri(server.url())
+            .unwrap()
+            .build()
+            .unwrap();
+
+        let gh = GithubServiceImpl {
+            gh: octo,
+            base_url: server.url(),
+            token: "test".to_string(),
+        };
+
+        let result = gh
+            .get_contents("jrumjantsev", "config", "apps/foo/config.json")
+            .await
+            .unwrap();
+        assert_eq!(result, r#"{"identify": "foo123"}"#);
+    }
+
+    #[tokio::test]
+    async fn test_find_first_pr_of_commit() {
+        let mut server = mockito::Server::new_async().await;
+
+        let _m = server.mock("GET", "/search/issues?q=SHA:123+repo:jrumjantsev/foo+type:pr&sort=created&order=asc")
+            .with_status(200)
+            .with_body(r#"{"items": [{"title": "FOO-123: created something", "body": "FOO-123: created something detailed"}]}"#)
+            .create_async()
+            .await;
+
+        let gh = GithubServiceImpl {
+            gh: Octocrab::default(),
+            base_url: server.url(),
+            token: "test".to_string(),
+        };
+
+        let result = gh
+            .find_first_pr_of_commit("jrumjantsev", "foo", "123")
+            .await
+            .unwrap();
+
+        assert_eq!(result.pr_title, "FOO-123: created something");
+        assert_eq!(result.pr_body, "FOO-123: created something detailed");
     }
 }

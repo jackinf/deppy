@@ -23,3 +23,9 @@ bar-web-prod:
 # Return all commits not deployed to Docgen web staging
 bar-web-staging:
 	$(DEPPY_COMMAND) to-deploy -p bar-web -e staging
+
+#
+# Dev
+#
+coverage:
+	cargo tarpaulin -o html

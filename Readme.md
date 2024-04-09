@@ -28,6 +28,12 @@ The project can be used via the command line interface. Here are some example co
 
 For a full list of commands, refer to the `Makefile`.
 
+## Running tests
+
+```bash
+ cargo tarpaulin -o html
+```
+
 ## Contributing
 
 Contributions are welcome. Please submit a pull request or create an issue to discuss the changes you want to make.
