@@ -275,3 +275,47 @@ impl GithubService for GithubServiceImpl {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::api::github_service::{GithubService, GithubServiceImpl};
+    use octocrab::Octocrab;
+
+    #[tokio::test]
+    async fn test_get_commit() {
+        let mut server = mockito::Server::new_async().await;
+
+        let _m = server
+            .mock("GET", "/repos/jrumjantsev/config/commits/123")
+            .with_status(200)
+            .with_body(
+                r#"{
+                    "commit": {
+                        "committer": {
+                            "date": "2021-08-01T00:00:00Z"
+                        },
+                        "author": {
+                            "email": "test@test.com"
+                        },
+                        "message": "Test commit message"
+                    }
+                }"#,
+            )
+            .create_async()
+            .await;
+
+        let gh = GithubServiceImpl {
+            gh: Octocrab::default(),
+            base_url: server.url(),
+            token: "test".to_string(),
+        };
+
+        let result = gh
+            .get_commit("jrumjantsev", "config", "123", false)
+            .await
+            .unwrap();
+        assert_eq!(result.author_email, "test@test.com");
+        assert_eq!(result.full_message, "Test commit message");
+        assert_eq!(result.sha, "123");
+    }
+}

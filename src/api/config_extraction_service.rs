@@ -94,10 +94,7 @@ mod tests {
                 eq("apps/foo/config.json"),
             )
             .times(1)
-            .returning(move |_, _, _| {
-                let response_payload = response_payload.to_string();
-                async move { Ok(response_payload) }.boxed()
-            });
+            .returning(|_, _, _| async { Ok(response_payload.to_string()) }.boxed());
 
         let service = GithubConfigExtractionServiceImpl::new(Box::new(github_service));
         let result = service.extract_commit_sha("foo", "dev").await;
